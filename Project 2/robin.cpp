@@ -172,6 +172,7 @@ int main( int argc, const char* argv[] )
     string line;
     int number, arrival, burst;
 	int quantum = atoi(argv[1]);
+	int endtime = 0;
     
 	// Fill linked list with all jobs
     while(!infile.eof())
@@ -184,6 +185,7 @@ int main( int argc, const char* argv[] )
 		// cout << "Arrival is: " << line << endl;
 		getline(infile, line);
         burst = stoi(line);
+		endtime = endtime + burst;
 		// cout << "Burst is: " << line << endl;
 		jobs.push_back(number, arrival, burst);
 		// jobs.traverse_and_print();
@@ -194,53 +196,57 @@ int main( int argc, const char* argv[] )
     infile.close();
 
 	LinkedList jobs_queued;
-	int t_queue, t_endqueue, t_global = 0;
+	int t_queue, t_endqueue, t_global;
+	int q = quantum;
 	Node *current = jobs.getHead();
 	bool end, all_processed = false;
+	int currentBurst = -1;
+	FILE *output;
+	output = fopen("output.txt", "w");
 	
-	while(!end)
+	while(t_global <= endtime)
 	{
-		cout << "Time is " << t_global << endl << endl;
+		// cout << "Time is " << t_global << endl;
 		t_queue = t_global;
 		t_endqueue = t_queue + quantum;
-		
-		while((current->getArrival() <= t_endqueue)&&(!all_processed))
+		while((current != NULL) && (current->getArrival() == t_global))
 		{
 			jobs_queued.push_back(current->getNumber(), current->getArrival(), current->getBurst());
-			if (current->getNext() == NULL)
-				all_processed = true;
-			else
-				current = current->getNext();
+			// cout << "Job " << current->getNumber() << " added." << endl;
+			current = current->getNext();
+			// cout << "Current is " << current->getNumber() << endl;
 		}
 		
 		if (jobs_queued.getHead() == NULL)
 			continue;
 		Node *printstart = jobs_queued.getHead();
-		while (printstart != NULL)
+		if ((printstart->getBurst() < quantum) && (currentBurst == -1))
 		{
-			// Job Finishes
-			if (printstart->getBurst() <= quantum)
-			{
-				cout << "Job number " << printstart->getNumber() << " processed for " << printstart->getBurst() << " ms. Job Finished" << endl;
-				jobs_queued.pop_head();
-				t_global = t_global + printstart->getBurst();
-				cout << "Time is " << t_global << endl;
-			}
-			// Quantum completes; Job not finished
-			else
-			{
-				cout << "Job number " << printstart->getNumber() << " processed for " << quantum << " ms. ";
-				int newBurst = printstart->getBurst() - quantum;
-				cout << newBurst << " ms. remains" << endl;
-				jobs_queued.push_back(printstart->getNumber(), printstart->getArrival(), newBurst);
-				jobs_queued.pop_head();
-				t_global = t_global + quantum;
-				cout << "Time is " << t_global << endl;
-			}
-			printstart = printstart->getNext();
+			currentBurst = printstart->getBurst();
 		}
+		printstart->setBurst(printstart->getBurst() - 1);
+		q--;
+		t_global++;
+		if (printstart->getBurst() == 0)
+		{
+			fprintf(output, "Job %d processed for %d ms. Job completed\n", printstart->getNumber(), currentBurst);
+			cout << "Job " << printstart->getNumber() << " processed for " << currentBurst << " ms. Job Completed\n";
+			jobs_queued.pop_head();
+			q = quantum;
+			currentBurst = -1;
+		}
+		else if (q == 0)
+		{
+			fprintf(output, "Job %d processed for %d ms. %d remains.\n", printstart->getNumber(), quantum, printstart->getBurst());
+			cout << "Job " << printstart->getNumber() << " processed for " << quantum << " ms. " << printstart->getBurst() << " remains\n";
+			jobs_queued.push_back(printstart->getNumber(), printstart->getArrival(), printstart->getBurst());
+			jobs_queued.pop_head();
+			q = quantum;
+		}
+
 	}
 
+	fclose(output);
     return 0;
 }
 
