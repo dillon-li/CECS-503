@@ -188,17 +188,12 @@ int main( int argc, const char* argv[] )
     {
 		getline(infile, line, ',');
         number = stoi(line);
-        // cout << "Number is: " << number << endl;
 		getline(infile, line, ',');
         arrival = stoi(line);
-		// cout << "Arrival is: " << line << endl;
 		getline(infile, line);
         burst = stoi(line);
 		endtime = endtime + burst;
-		// cout << "Burst is: " << line << endl;
 		jobs.push_back(number, arrival, burst);
-		// jobs.traverse_and_print();
-        //system("pause");
     }  
 	
 	cout << "Total time: " << endtime << endl;
@@ -217,15 +212,12 @@ int main( int argc, const char* argv[] )
 	
 	while(t_global < endtime)
 	{
-		// cout << "Time is " << t_global << endl;
 		t_queue = t_global;
 		t_endqueue = t_queue + quantum;
 		while((current != NULL) && (current->getArrival() == t_global))
 		{
 			jobs_queued.push_back(current->getNumber(), current->getArrival(), current->getBurst());
-			// cout << "Job " << current->getNumber() << " added." << endl;
 			current = current->getNext();
-			// cout << "Current is " << current->getNumber() << endl;
 		}
 		
 		if (jobs_queued.getHead() == NULL)
