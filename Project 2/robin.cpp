@@ -3,6 +3,9 @@ Project 2: Round Robin Job Scheduling
 
 Note: I re-used assignment 3 code for linked list implementation
 
+Also, recently pushed to my github at GreenKoopa in case it comes up 
+in your checks.
+
  */
 
 #include <iostream>
