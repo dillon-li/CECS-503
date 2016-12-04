@@ -233,7 +233,7 @@ int main( int argc, const char* argv[] )
 		currentBurst = -1;
 		continue;
 		}
-		if ((printstart->getBurst() < quantum) && (currentBurst == -1))
+		if ((printstart->getBurst() <= quantum) && (currentBurst == -1))
 		{
 			currentBurst = printstart->getBurst();
 		}
