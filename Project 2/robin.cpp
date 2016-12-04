@@ -153,9 +153,15 @@ void LinkedList::push_back(int number, int arrival, int burst)
 void LinkedList::pop_head()
 {
 	Node *p = pHead;
-	pHead = pHead->pNext;
-	pHead->pPrevious = NULL;
-	free(p);
+	// Last node case
+	if (pHead->pNext == NULL)
+		free(p);
+	else
+	{
+		pHead = pHead->pNext;
+		pHead->pPrevious = NULL;
+		free(p);
+	}
 }
 
 int main( int argc, const char* argv[] )
@@ -192,6 +198,8 @@ int main( int argc, const char* argv[] )
         //system("pause");
     }  
 	
+	cout << "Total time: " << endtime << endl;
+
 	// jobs.traverse_and_print();
     infile.close();
 
@@ -204,7 +212,7 @@ int main( int argc, const char* argv[] )
 	FILE *output;
 	output = fopen("output.txt", "w");
 	
-	while(t_global <= endtime)
+	while(t_global < endtime)
 	{
 		// cout << "Time is " << t_global << endl;
 		t_queue = t_global;
@@ -220,6 +228,16 @@ int main( int argc, const char* argv[] )
 		if (jobs_queued.getHead() == NULL)
 			continue;
 		Node *printstart = jobs_queued.getHead();
+
+		// Process queue, 1 second each time
+		if (printstart->getBurst() == 0)
+		{
+			fprintf(output, "Job %d has 0 burst. Job completed.\n", printstart->getNumber());
+		jobs_queued.pop_head();
+		q = quantum;
+		currentBurst = -1;
+		continue;
+		}
 		if ((printstart->getBurst() < quantum) && (currentBurst == -1))
 		{
 			currentBurst = printstart->getBurst();
@@ -243,7 +261,6 @@ int main( int argc, const char* argv[] )
 			jobs_queued.pop_head();
 			q = quantum;
 		}
-
 	}
 
 	fclose(output);
